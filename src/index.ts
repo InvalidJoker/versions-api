@@ -79,6 +79,23 @@ app.get("/health", (c) => {
   return c.json({ status: "ok" });
 });
 
+app.get("/api/v1/endpoints", (c) => {
+  return c.json({
+    minecraft: {
+      vanilla: "/api/v1/minecraft/vanilla",
+      paper: "/api/v1/minecraft/paper",
+      purpur: "/api/v1/minecraft/purpur",
+      fabric: "/api/v1/minecraft/fabric",
+      forge: "/api/v1/minecraft/forge",
+      neoforge: "/api/v1/minecraft/neoforge",
+      quilt: "/api/v1/minecraft/quilt",
+    },
+    docker: {
+      node: "/api/v1/docker/node",
+    },
+  });
+});
+
 const initializeData = async () => {
   try {
     await Promise.all([
