@@ -1,7 +1,7 @@
 interface JavaVersion {
-  minimum: string;
-  maximum: string;
-  recommended: string; // Always an LTS version
+  minimum: number;
+  maximum: number;
+  recommended: number; // Always an LTS version
 }
 
 interface MinecraftVersion {
@@ -12,12 +12,12 @@ interface MinecraftVersion {
   javaVersions: JavaVersion;
   supportsDatapacks: boolean;
   buildNumbers?: {
-    min?: string;
-    max?: string;
+    min?: number;
+    max?: number;
   };
   loaderVersions?: {
-    min?: string;
-    max?: string;
+    min?: number;
+    max?: number;
   };
   isSnapshot: boolean;
 }

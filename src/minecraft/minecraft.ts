@@ -70,9 +70,9 @@ function createVersionObject(
     baseVersion,
     isStable,
     javaVersions: {
-      minimum: recommendedJava >= 17 ? "17" : "8",
-      maximum: "21",
-      recommended: recommendedJava.toString(),
+      minimum: recommendedJava,
+      maximum: 21,
+      recommended: recommendedJava,
     },
     supportsDatapacks,
     isSnapshot: type === "snapshot",
@@ -137,8 +137,8 @@ async function fetchPaperVersions(): Promise<MinecraftVersion[]> {
               !versionId.includes("snapshot"),
               {
                 buildNumbers: {
-                  min: minBuild.toString(),
-                  max: maxBuild.toString(),
+                  min: minBuild,
+                  max: maxBuild,
                 },
               }
             )
@@ -188,8 +188,8 @@ async function fetchPurpurVersions(): Promise<MinecraftVersion[]> {
               !versionId.includes("snapshot"),
               {
                 buildNumbers: {
-                  min: minBuild,
-                  max: maxBuild,
+                  min: parseInt(minBuild),
+                  max: parseInt(maxBuild),
                 },
               }
             )
@@ -296,8 +296,8 @@ async function fetchForgeVersions(): Promise<MinecraftVersion[]> {
             key.includes("recommended"),
             {
               buildNumbers: {
-                min: forgeVersion,
-                max: forgeVersion,
+                min: parseInt(forgeVersion),
+                max: parseInt(forgeVersion),
               },
             }
           )
@@ -332,8 +332,8 @@ async function fetchNeoForgeVersions(): Promise<MinecraftVersion[]> {
         versions.push(
           createVersionObject(version, mcVersion, "release", true, {
             buildNumbers: {
-              min: version,
-              max: version,
+              min: parseInt(version),
+              max: parseInt(version),
             },
           })
         );
