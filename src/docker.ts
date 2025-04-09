@@ -1,6 +1,7 @@
 import ky from "ky";
 import { CACHE_TTL, redis } from "./variables.js";
 import { UniqueOrderedSet } from "./set.js";
+import * as Sentry from "@sentry/node";
 
 interface DockerImageTagsResponse {
   next: string | null;
@@ -62,7 +63,8 @@ async function listDockerTags(image: string): Promise<string[]> {
     return Array.from(result);
   } catch (error) {
     console.error(`Error fetching Docker tags for ${image}:`, error);
-    throw new Error(`Failed to fetch Docker tags for ${image}`);
+    Sentry.captureException(error);
+    return [];
   }
 }
 
@@ -98,7 +100,8 @@ async function updateNodeVersionCache(): Promise<NodeVersion[]> {
     return sortedVersions;
   } catch (error) {
     console.error("Error updating Node.js version cache:", error);
-    throw error;
+    Sentry.captureException(error);
+    return [];
   }
 }
 
@@ -116,6 +119,7 @@ async function fetchDockerNodeVersions() {
     return nodeVersions;
   } catch (error) {
     console.error("Error fetching Docker Node versions:", error);
+    Sentry.captureException(error);
     const cachedData = await redis.get("docker:node");
     return (cachedData as NodeVersion[]) || [];
   }

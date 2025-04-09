@@ -5,6 +5,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { prettyJSON } from "hono/pretty-json";
 import { serve } from "@hono/node-server";
 import * as cron from "node-cron";
+import * as Sentry from "@sentry/node";
 import {
   fetchVanillaVersions,
   fetchPaperVersions,
@@ -112,10 +113,15 @@ const initializeData = async () => {
     console.log("Initial data fetch complete");
   } catch (error) {
     console.error("Error initializing data:", error);
+    Sentry.captureException(error);
   }
 };
 
 setupCacheUpdaters();
+
+Sentry.init({
+  dsn: "https://c7a2c043fdc914f75b03612cd7ed87ea@o4507044844404736.ingest.us.sentry.io/4509124926963712",
+});
 
 const PORT = process.env.PORT || 8080;
 

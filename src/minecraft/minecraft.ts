@@ -1,6 +1,7 @@
 import ky from "ky";
 import { CACHE_TTL, redis } from "../variables.js";
 import type { MinecraftVersion, MojangVersionManifest } from "./types.js";
+import * as Sentry from "@sentry/node";
 
 function determineJavaAndDatapack(versionId: string): {
   recommendedJava: number;
@@ -46,6 +47,7 @@ async function fetchVersions<T>(
     return versions;
   } catch (error) {
     console.error(`Error fetching ${cacheKey} versions:`, error);
+    Sentry.captureException(error);
     const cachedData = await redis.get(cacheKey);
     return (cachedData as MinecraftVersion[]) || [];
   }
@@ -151,6 +153,7 @@ async function fetchPaperVersions(): Promise<MinecraftVersion[]> {
           `Error fetching Paper builds for version ${versionId}:`,
           error
         );
+        Sentry.captureException(error);
       }
     }
 
@@ -198,6 +201,7 @@ async function fetchPurpurVersions(): Promise<MinecraftVersion[]> {
           if (versionId === "1.7.10") break;
         }
       } catch (error) {
+        Sentry.captureException(error);
         console.error(
           `Error fetching Purpur builds for version ${versionId}:`,
           error
