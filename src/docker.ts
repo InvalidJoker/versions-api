@@ -23,7 +23,6 @@ function versionCompare(
   return 0;
 }
 
-// Fetch Docker image tags similar to the Rust implementation
 async function listDockerTags(image: string): Promise<string[]> {
   const client = ky.create({
     retry: {
@@ -67,7 +66,6 @@ async function listDockerTags(image: string): Promise<string[]> {
   }
 }
 
-// NodeVersionCache type
 interface NodeVersion {
   major: number;
   minor: number;

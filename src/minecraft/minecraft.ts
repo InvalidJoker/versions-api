@@ -2,15 +2,13 @@ import ky from "ky";
 import { CACHE_TTL, redis } from "../variables.js";
 import type { MinecraftVersion, MojangVersionManifest } from "./types.js";
 
-// Helper function to determine Java versions and data pack support based on the provided Rust logic
 function determineJavaAndDatapack(versionId: string): {
   recommendedJava: number;
   supportsDatapacks: boolean;
 } {
-  let recommendedJava = 21; // Default to latest LTS as of 2025
+  let recommendedJava = 21;
   let supportsDatapacks = true;
 
-  // Implementing the Rust logic
   switch (versionId) {
     case "1.20.4":
       recommendedJava = 17;
@@ -20,12 +18,10 @@ function determineJavaAndDatapack(versionId: string): {
       break;
   }
 
-  // check if under 1.12.2
   if (versionId < "1.12.2") {
     supportsDatapacks = false;
   }
 
-  // For versions below 1.12, data packs are not supported
   const versionNum = parseFloat(versionId.split(".").slice(0, 2).join("."));
   if (versionNum <= 1.12) {
     supportsDatapacks = false;
@@ -34,7 +30,6 @@ function determineJavaAndDatapack(versionId: string): {
   return { recommendedJava, supportsDatapacks };
 }
 
-// Fetch version data functions
 async function fetchVanillaVersions() {
   try {
     const cachedData = await redis.get("minecraft:vanilla");
@@ -47,7 +42,6 @@ async function fetchVanillaVersions() {
       .json();
     const versions: MinecraftVersion[] = [];
 
-    // Filter for release versions only and process them according to the Rust logic
     let index = 0;
     for (const version of manifest.versions) {
       if (version.type === "release") {
@@ -69,7 +63,6 @@ async function fetchVanillaVersions() {
           isSnapshot: false,
         });
 
-        // Break if we hit 1.7.10 as in the Rust code
         if (version.id === "1.7.10") {
           break;
         }
@@ -133,6 +126,10 @@ async function fetchPaperVersions() {
             },
             isSnapshot: versionId.includes("snapshot"),
           });
+
+          if (versionId === "1.7.10") {
+            break;
+          }
         }
       } catch (error) {
         console.error(
@@ -195,6 +192,10 @@ async function fetchPurpurVersions() {
             },
             isSnapshot: versionId.includes("snapshot"),
           });
+
+          if (versionId === "1.7.10") {
+            break;
+          }
         }
       } catch (error) {
         console.error(
@@ -221,12 +222,10 @@ async function fetchFabricVersions() {
       return cachedData as MinecraftVersion[];
     }
 
-    // Get Fabric loader versions
     const loaders = await ky
       .get("https://meta.fabricmc.net/v2/versions/loader")
       .json<any[]>();
 
-    // Get game versions
     const gameVersions = await ky
       .get("https://meta.fabricmc.net/v2/versions/game")
       .json<any[]>();
@@ -257,7 +256,6 @@ async function fetchFabricVersions() {
           isSnapshot: false,
         });
 
-        // Break if we hit 1.7.10 as in the Rust code
         if (version.version === "1.7.10") {
           break;
         }
@@ -281,7 +279,6 @@ async function fetchForgeVersions() {
       return cachedData as MinecraftVersion[];
     }
 
-    // Note: This is a simplified approach as the Forge API is more complex
     const forgeData = await ky
       .get(
         "https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"
@@ -290,7 +287,7 @@ async function fetchForgeVersions() {
 
     const versions: MinecraftVersion[] = [];
 
-    // Process recommended and latest versions
+
     for (const key in forgeData.promos) {
       if (key.includes("recommended") || key.includes("latest")) {
         const mcVersion = key.split("-")[0];
@@ -315,6 +312,10 @@ async function fetchForgeVersions() {
           },
           isSnapshot: false,
         });
+
+        if (mcVersion === "1.7.10") {
+          break;
+        }
       }
     }
 
@@ -335,7 +336,6 @@ async function fetchNeoForgeVersions() {
       return cachedData as MinecraftVersion[];
     }
 
-    // NeoForge versions API
     const neoForgeData = await ky
       .get(
         "https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge"
@@ -346,7 +346,6 @@ async function fetchNeoForgeVersions() {
     const neoForgeVersions: MinecraftVersion[] = [];
 
     for (const version of versions) {
-      // Extract MC version from NeoForge version (this is an approximation)
       const mcVersionMatch = version.match(/(\d+\.\d+(?:\.\d+)?)/);
       if (mcVersionMatch) {
         const mcVersion = mcVersionMatch[1];
@@ -370,6 +369,10 @@ async function fetchNeoForgeVersions() {
           },
           isSnapshot: false,
         });
+
+        if (mcVersion === "1.7.10") {
+          break;
+        }
       }
     }
 
@@ -390,12 +393,11 @@ async function fetchQuiltVersions() {
       return cachedData as MinecraftVersion[];
     }
 
-    // Get Quilt loader versions
+
     const loaders = await ky
       .get("https://meta.quiltmc.org/v3/versions/loader")
       .json<any[]>();
 
-    // Get game versions
     const gameVersions = await ky
       .get("https://meta.quiltmc.org/v3/versions/game")
       .json<any[]>();
@@ -426,7 +428,6 @@ async function fetchQuiltVersions() {
           isSnapshot: false,
         });
 
-        // Break if we hit 1.7.10 as in the Rust code
         if (version.version === "1.7.10") {
           break;
         }

@@ -1,4 +1,3 @@
-// Types
 interface JavaVersion {
   minimum: string;
   maximum: string;

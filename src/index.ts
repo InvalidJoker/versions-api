@@ -16,10 +16,8 @@ import {
 } from "./minecraft/minecraft.js";
 import { fetchDockerNodeVersions } from "./docker.js";
 
-// Initialize Hono app
 const app = new Hono();
 
-// Middleware
 app.use("*", logger());
 app.use("*", secureHeaders());
 app.use("*", prettyJSON());
@@ -27,45 +25,16 @@ app.use("*", prettyJSON());
 const setupCacheUpdaters = () => {
   cron.schedule("0 0 * * *", () => {
     fetchVanillaVersions();
-  });
-
-  // Update Paper at 1 AM
-  cron.schedule("0 1 * * *", () => {
     fetchPaperVersions();
-  });
-
-  // Update Purpur at 2 AM
-  cron.schedule("0 2 * * *", () => {
     fetchPurpurVersions();
-  });
-
-  // Update Fabric at 3 AM
-  cron.schedule("0 3 * * *", () => {
     fetchFabricVersions();
-  });
-
-  // Update Forge at 4 AM
-  cron.schedule("0 4 * * *", () => {
     fetchForgeVersions();
-  });
-
-  // Update NeoForge at 5 AM
-  cron.schedule("0 5 * * *", () => {
     fetchNeoForgeVersions();
-  });
-
-  // Update Quilt at 6 AM
-  cron.schedule("0 6 * * *", () => {
     fetchQuiltVersions();
-  });
-
-  // Update Docker Node versions at 7 AM
-  cron.schedule("0 7 * * *", () => {
     fetchDockerNodeVersions();
   });
 };
 
-// API Endpoints
 app.get("/api/v1/minecraft/vanilla", async (c) => {
   const versions = await fetchVanillaVersions();
   return c.json(versions);
@@ -101,18 +70,15 @@ app.get("/api/v1/minecraft/quilt", async (c) => {
   return c.json(versions);
 });
 
-// Docker Node.js versions endpoint with API key protection
 app.get("/api/v1/docker/node", async (c) => {
   const versions = await fetchDockerNodeVersions();
   return c.json(versions);
 });
 
-// Health check endpoint
 app.get("/health", (c) => {
   return c.json({ status: "ok" });
 });
 
-// Initialize data on startup
 const initializeData = async () => {
   try {
     await Promise.all([
@@ -132,10 +98,8 @@ const initializeData = async () => {
   }
 };
 
-// Set up scheduled cache updates
 setupCacheUpdaters();
 
-// Start the server
 const PORT = process.env.PORT || 3000;
 
 serve(
