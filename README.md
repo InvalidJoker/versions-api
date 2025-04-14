@@ -46,4 +46,4 @@ Each version type is cached individually in Redis using sensible TTL values. Use
 
 ## 📄 License
 
-MIT — contributions welcome!
+GNU GPLv3 - see [LICENSE](LICENSE) for details.

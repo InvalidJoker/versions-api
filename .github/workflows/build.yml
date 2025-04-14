@@ -1,11 +1,14 @@
 #
 name: Create and publish a Docker image
 
-
 on:
   push:
     branches:
       - main
+    paths:
+      - src/**
+      - Dockerfile
+      - package.json
 
 env:
   REGISTRY: ghcr.io
