@@ -16,12 +16,29 @@ import {
   fetchQuiltVersions,
 } from "./minecraft/minecraft.js";
 import { fetchDockerNodeVersions } from "./docker.js";
+import { error, info } from "./utils.js";
 
 const app = new Hono();
 
-app.use("*", logger());
+const token = process.env.AUTH_TOKEN;
+
 app.use("*", secureHeaders());
 app.use("*", prettyJSON());
+
+if (process.env.NODE_ENV === "development") {
+  app.use("*", logger());
+}
+
+if (token) {
+  app.use("*", async (c, next) => {
+    const authHeader = c.req.header("Authorization");
+    if (!authHeader || authHeader !== "Bearer " + token) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    return next();
+  });
+}
 
 const setupCacheUpdaters = () => {
   cron.schedule("0 0 * * *", () => {
@@ -110,10 +127,10 @@ const initializeData = async () => {
       fetchDockerNodeVersions(),
     ]);
 
-    console.log("Initial data fetch complete");
-  } catch (error) {
-    console.error("Error initializing data:", error);
-    Sentry.captureException(error);
+    info("Initial data fetch complete");
+  } catch (e) {
+    error("Error initializing data:", e);
+    Sentry.captureException(e);
   }
 };
 
@@ -131,7 +148,7 @@ serve(
     port: Number(PORT),
   },
   async () => {
-    console.log(`Server running on port ${PORT}`);
+    info(`Server running on port ${PORT}`);
     await initializeData();
   }
 );

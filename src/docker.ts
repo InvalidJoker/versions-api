@@ -2,6 +2,7 @@ import ky from "ky";
 import { CACHE_TTL, redis } from "./variables.js";
 import { UniqueOrderedSet } from "./set.js";
 import * as Sentry from "@sentry/node";
+import { debug, error, info } from "./utils.js";
 
 interface DockerImageTagsResponse {
   next: string | null;
@@ -58,12 +59,12 @@ async function listDockerTags(image: string): Promise<string[]> {
       }
     }
 
-    console.debug(`Found ${result.size} tags`);
+    debug(`Found ${result.size} tags`);
 
     return Array.from(result);
-  } catch (error) {
-    console.error(`Error fetching Docker tags for ${image}:`, error);
-    Sentry.captureException(error);
+  } catch (e) {
+    error(`Error fetching Docker tags for ${image}:`, e);
+    Sentry.captureException(e);
     return [];
   }
 }
@@ -98,9 +99,9 @@ async function updateNodeVersionCache(): Promise<NodeVersion[]> {
     );
 
     return sortedVersions;
-  } catch (error) {
-    console.error("Error updating Node.js version cache:", error);
-    Sentry.captureException(error);
+  } catch (e) {
+    error("Error updating Node.js version cache:", e);
+    Sentry.captureException(e);
     return [];
   }
 }
@@ -115,11 +116,11 @@ async function fetchDockerNodeVersions() {
     const nodeVersions = await updateNodeVersionCache();
 
     await redis.set("docker:node", nodeVersions, { ex: CACHE_TTL });
-    console.log("Docker Node versions updated in Redis");
+    info("Docker Node versions updated in Redis");
     return nodeVersions;
-  } catch (error) {
-    console.error("Error fetching Docker Node versions:", error);
-    Sentry.captureException(error);
+  } catch (e) {
+    error("Error fetching Docker Node versions:", e);
+    Sentry.captureException(e);
     const cachedData = await redis.get("docker:node");
     return (cachedData as NodeVersion[]) || [];
   }

@@ -2,6 +2,7 @@ import ky from "ky";
 import { CACHE_TTL, redis } from "../variables.js";
 import type { MinecraftVersion, MojangVersionManifest } from "./types.js";
 import * as Sentry from "@sentry/node";
+import { error, info } from "../utils.js";
 
 function determineJavaAndDatapack(versionId: string): {
   recommendedJava: number;
@@ -41,13 +42,13 @@ async function fetchVersions<T>(
 
     if (versions.length > 0) {
       await redis.set(cacheKey, versions, { ex: CACHE_TTL });
-      console.log(`${cacheKey} versions updated in Redis`);
+      info(`${cacheKey} versions updated in Redis`);
     }
 
     return versions;
-  } catch (error) {
-    console.error(`Error fetching ${cacheKey} versions:`, error);
-    Sentry.captureException(error);
+  } catch (e) {
+    error(`Error fetching ${cacheKey} versions:`, e);
+    Sentry.captureException(e);
     const cachedData = await redis.get(cacheKey);
     return (cachedData as MinecraftVersion[]) || [];
   }
@@ -148,12 +149,9 @@ async function fetchPaperVersions(): Promise<MinecraftVersion[]> {
 
           if (versionId === "1.7.10") break;
         }
-      } catch (error) {
-        console.error(
-          `Error fetching Paper builds for version ${versionId}:`,
-          error
-        );
-        Sentry.captureException(error);
+      } catch (e) {
+        error(`Error fetching Paper builds for version ${versionId}:`, e);
+        Sentry.captureException(e);
       }
     }
 
@@ -200,12 +198,9 @@ async function fetchPurpurVersions(): Promise<MinecraftVersion[]> {
 
           if (versionId === "1.7.10") break;
         }
-      } catch (error) {
-        Sentry.captureException(error);
-        console.error(
-          `Error fetching Purpur builds for version ${versionId}:`,
-          error
-        );
+      } catch (e) {
+        Sentry.captureException(e);
+        error(`Error fetching Purpur builds for version ${versionId}:`, e);
       }
     }
 
